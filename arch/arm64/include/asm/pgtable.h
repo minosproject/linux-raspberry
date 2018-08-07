@@ -374,6 +374,8 @@ static inline int pmd_protnone(pmd_t pmd)
 #define pmd_write(pmd)		pte_write(pmd_pte(pmd))
 
 #define pmd_mkhuge(pmd)		(__pmd(pmd_val(pmd) & ~PMD_TABLE_BIT))
+#define pmd_mkhuge_normal(pmd)	pmd_mkhuge(pmd | PROT_SECT_NORMAL | PMD_SECT_NG | PMD_SECT_USER)
+#define pmd_mkhuge_device(pmd)	pmd_mkhuge(pmd | PROT_SECT_DEVICE_nGnRE | PMD_SECT_NG | PMD_SECT_USER)
 
 #define __pmd_to_phys(pmd)	__pte_to_phys(pmd_pte(pmd))
 #define __phys_to_pmd_val(phys)	__phys_to_pte_val(phys)

@@ -1181,6 +1181,17 @@ static inline unsigned long zap_pmd_range(struct mmu_gather *tlb,
 				goto next;
 			/* fall through */
 		}
+
+		if (vma->vm_flags & VM_PFNMAP) {
+			/*
+			 * if the VM_PFNMAP is set, indicate that the
+			 * huge page is directly mapped to a physical
+			 * address, just clear the pmd entry
+			 */
+			pmdp_get_and_clear(tlb->mm, addr, pmd);
+			goto next;
+		}
+
 		/*
 		 * Here there can be other concurrent MADV_DONTNEED or
 		 * trans huge page faults running, and if the pmd is
