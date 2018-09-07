@@ -1188,7 +1188,7 @@ static inline unsigned long zap_pmd_range(struct mmu_gather *tlb,
 			 * huge page is directly mapped to a physical
 			 * address, just clear the pmd entry
 			 */
-			pmdp_get_and_clear(tlb->mm, addr, pmd);
+			pmdp_huge_get_and_clear(tlb->mm, addr, pmd);
 			goto next;
 		}
 
