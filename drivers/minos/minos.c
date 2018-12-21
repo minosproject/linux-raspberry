@@ -43,6 +43,7 @@
 #include <linux/netlink.h>
 #include <linux/skbuff.h>
 #include <linux/eventfd.h>
+#include <linux/interrupt.h>
 
 #include <linux/minos.h>
 
@@ -502,7 +503,7 @@ static pte_t *mvm_pmd_alloc(struct mm_struct *mm, unsigned long addr)
 	pgd_t *pgd;
 
 	pgd = pgd_offset(mm, addr);
-	if (*pgd) {
+	if (pgd_val(*pgd)) {
 		return (pte_t *)pmd_offset((pud_t *)pgd, addr);
 	} else
 		return (pte_t *)pmd_alloc(mm, (pud_t *)pgd, addr);
