@@ -1182,6 +1182,7 @@ static inline unsigned long zap_pmd_range(struct mmu_gather *tlb,
 			/* fall through */
 		}
 
+#ifdef CONFIG_MINOS_HYPERVISOR_DRIVER
 		if (vma->vm_flags & VM_PFNMAP) {
 			/*
 			 * if the VM_PFNMAP is set, indicate that the
@@ -1191,6 +1192,7 @@ static inline unsigned long zap_pmd_range(struct mmu_gather *tlb,
 			pmdp_huge_get_and_clear(tlb->mm, addr, pmd);
 			goto next;
 		}
+#endif
 
 		/*
 		 * Here there can be other concurrent MADV_DONTNEED or
