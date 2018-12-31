@@ -61,8 +61,8 @@
 #define HWIRQ_BANK(i)		(i >> 5)
 #define HWIRQ_BIT(i)		BIT(i & 0x1f)
 
-#define NR_IRQS_BANK0		8
-#define BANK0_HWIRQ_MASK	0xff
+#define NR_IRQS_BANK0		32
+#define BANK0_HWIRQ_MASK	0xffe000ff
 /* Shortcuts can't be disabled so any unknown new ones need to be masked */
 #define SHORTCUT1_MASK		0x00007c00
 #define SHORTCUT2_MASK		0x001f8000
@@ -86,7 +86,7 @@
 static const int reg_pending[] __initconst = { 0x00, 0x04, 0x08 };
 static const int reg_enable[] __initconst = { 0x18, 0x10, 0x14 };
 static const int reg_disable[] __initconst = { 0x24, 0x1c, 0x20 };
-static const int bank_irqs[] __initconst = { 8, 32, 32 };
+static const int bank_irqs[] __initconst = { 32, 32, 32 };
 
 static const int shortcuts[] = {
 	7, 9, 10, 18, 19,		/* Bank 1 */
@@ -168,14 +168,24 @@ static void armctrl_ack_irq(struct irq_data *d)
 	bcm2836_arm_irqchip_spin_gpu_irq();
 }
 
+#ifdef CONFIG_MINOS
+static void armctrl_eoi_virq(struct irq_data *d)
+{
+	/* minos hypervisor use 0x228 to ack irq */
+	writel_relaxed(d->hwirq, intc.base + 0x28);
+}
+#endif
+
 #endif
 
 static struct irq_chip armctrl_chip = {
 	.name = "ARMCTRL-level",
 	.irq_mask = armctrl_mask_irq,
 	.irq_unmask = armctrl_unmask_irq,
-#ifdef CONFIG_ARM64
+#if defined(CONFIG_ARM64) && !defined(CONFIG_MINOS)
 	.irq_ack    = armctrl_ack_irq
+#elif defined(CONFIG_ARM64) && defined(CONFIG_MINOS)
+	.irq_eoi    = armctrl_eoi_virq
 #endif
 };
 
@@ -230,7 +240,7 @@ static int __init armctrl_of_init(struct device_node *node,
 			irq = irq_create_mapping(intc.domain, MAKE_HWIRQ(b, i));
 			BUG_ON(irq <= 0);
 			irq_set_chip_and_handler(irq, &armctrl_chip,
-				handle_level_irq);
+				handle_fasteoi_irq);
 			irq_set_probe(irq);
 		}
 	}
