@@ -1174,25 +1174,25 @@ static inline unsigned long zap_pmd_range(struct mmu_gather *tlb,
 	pmd = pmd_offset(pud, addr);
 	do {
 		next = pmd_addr_end(addr, end);
+
 		if (is_swap_pmd(*pmd) || pmd_trans_huge(*pmd) || pmd_devmap(*pmd)) {
 			if (next - addr != HPAGE_PMD_SIZE)
 				__split_huge_pmd(vma, pmd, addr, false, NULL);
+#ifdef CONFIG_MINOS_HYPERVISOR_DRIVER
+			else if (vma->vm_flags & VM_PFNMAP) {
+				/*
+				 * if the VM_PFNMAP is set, indicate that the
+				 * huge page is directly mapped to a physical
+				 * address, just clear the pmd entry
+				 */
+				pmdp_huge_get_and_clear(tlb->mm, addr, pmd);
+				goto next;
+			}
+#endif
 			else if (zap_huge_pmd(tlb, vma, pmd, addr))
 				goto next;
 			/* fall through */
 		}
-
-#ifdef CONFIG_MINOS_HYPERVISOR_DRIVER
-		if (vma->vm_flags & VM_PFNMAP) {
-			/*
-			 * if the VM_PFNMAP is set, indicate that the
-			 * huge page is directly mapped to a physical
-			 * address, just clear the pmd entry
-			 */
-			pmdp_huge_get_and_clear(tlb->mm, addr, pmd);
-			goto next;
-		}
-#endif
 
 		/*
 		 * Here there can be other concurrent MADV_DONTNEED or
