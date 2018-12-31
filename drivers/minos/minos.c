@@ -293,7 +293,7 @@ static int unregister_vm_event(struct vm_device *vm, int irq)
 	int virq;
 	struct vm_event *event;
 
-	pr_info("unregister irq-0x%d\n", irq);
+	pr_info("unregister irq-%d\n", irq);
 	if ((irq >= MVM_EVENT_ID_END) || (irq < MVM_EVENT_ID_BASE))
 		return -EINVAL;
 
@@ -325,7 +325,7 @@ static int register_vm_event(struct vm_device *vm, int eventfd, int irq)
 	struct file *eventfp;
 	char *name;
 
-	pr_info("register event-%d irq-0x%d\n", eventfd, irq);
+	pr_info("register event-%d irq-%d\n", eventfd, irq);
 	if ((irq >= MVM_EVENT_ID_END) || (irq < MVM_EVENT_ID_BASE))
 		return -EINVAL;
 
@@ -704,6 +704,8 @@ static int minos_hv_probe(struct platform_device *pdev)
 {
 	int err;
 
+	pr_info("Minos Hyperviosr Driver Init ...\n");
+
 	mpdev = pdev;
 	vm_class = class_create(THIS_MODULE, "mvm");
 	err = PTR_ERR(vm_class);
@@ -729,6 +731,8 @@ static int minos_hv_probe(struct platform_device *pdev)
 		goto destroy_class;
 
 	memset(vm_event_table, 0, EVENT_PAGE_NR * PAGE_SIZE);
+	pr_info("Minos Hyperviosr Driver Init Done\n");
+
 	return 0;
 
 unregister_chardev:
