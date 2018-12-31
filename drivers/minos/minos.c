@@ -44,6 +44,7 @@
 #include <linux/skbuff.h>
 #include <linux/eventfd.h>
 #include <linux/interrupt.h>
+#include <linux/mod_devicetable.h>
 
 #include <linux/minos.h>
 
