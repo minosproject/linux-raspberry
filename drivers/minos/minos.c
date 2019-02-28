@@ -44,9 +44,9 @@
 #include <linux/skbuff.h>
 #include <linux/eventfd.h>
 #include <linux/interrupt.h>
-#include <linux/mod_devicetable.h>
+#include <linux/of.h>
 
-#include <linux/minos.h>
+#include "minos.h"
 
 static struct platform_device *mpdev;
 

@@ -67,4 +67,3 @@ static int __init virtio_early_console_setup(struct earlycon_device *device, con
 EARLYCON_DECLARE(virtio_console, virtio_early_console_setup);
 OF_EARLYCON_DECLARE(virtio_console, "virtio_console",
 		virtio_early_console_setup);
-
