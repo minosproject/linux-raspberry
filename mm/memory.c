@@ -889,6 +889,13 @@ static inline int copy_pmd_range(struct mm_struct *dst_mm, struct mm_struct *src
 	src_pmd = pmd_offset(src_pud, addr);
 	do {
 		next = pmd_addr_end(addr, end);
+
+#ifdef CONFIG_MINOS
+		if (!mvm_copy_pmd_range(dst_mm, src_mm,
+					dst_pmd, src_pmd, addr, vma))
+			continue;
+#endif
+
 		if (is_swap_pmd(*src_pmd) || pmd_trans_huge(*src_pmd)
 			|| pmd_devmap(*src_pmd)) {
 			int err;
@@ -1175,20 +1182,14 @@ static inline unsigned long zap_pmd_range(struct mmu_gather *tlb,
 	do {
 		next = pmd_addr_end(addr, end);
 
+#ifdef CONFIG_MINOS
+		if (!mvm_zap_pmd_range(tlb, vma, pmd, addr))
+			goto next;
+#endif
+
 		if (is_swap_pmd(*pmd) || pmd_trans_huge(*pmd) || pmd_devmap(*pmd)) {
 			if (next - addr != HPAGE_PMD_SIZE)
 				__split_huge_pmd(vma, pmd, addr, false, NULL);
-#ifdef CONFIG_MINOS_HYPERVISOR_DRIVER
-			else if (vma->vm_flags & VM_PFNMAP) {
-				/*
-				 * if the VM_PFNMAP is set, indicate that the
-				 * huge page is directly mapped to a physical
-				 * address, just clear the pmd entry
-				 */
-				pmdp_huge_get_and_clear(tlb->mm, addr, pmd);
-				goto next;
-			}
-#endif
 			else if (zap_huge_pmd(tlb, vma, pmd, addr))
 				goto next;
 			/* fall through */
