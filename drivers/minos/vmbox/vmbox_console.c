@@ -623,6 +623,9 @@ static int __init vm_init_debug_console(void)
 	if (!vc)
 		vc = create_vm_debug_console();
 
+	if (!vc)
+		return -ENODEV;
+
 	pr_info("register vm debug console\n");
 	hvc_instantiate(VMBOX_HVC_COOLIE + vc->id,
 			vc->id, &vm_debug_hvc_ops);
